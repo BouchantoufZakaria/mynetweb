@@ -13,27 +13,45 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
+            $table->uuid()->unique();
+            $table->string('username');
+            $table->text('fcm_token')->nullable();
+            $table->string('phone_number');
+            $table->foreignId('last_win_draw_id')
+                ->constrained('draws')
+            ->nullOnDelete();
+            $table->string('access_token')->unique();
             $table->timestamps();
         });
 
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+            $table->timestamp('login_at')
+                ->default(DB::raw('CURRENT_TIMESTAMP'))
+                ->index();
+
+            $table->unique(['user_id', DB::raw('DATE(login_at)')], 'user_session_per_day_unique');
+        });
+
+        Schema::table('draws', function (Blueprint $table) {
+            $table->id();
+            $table->date('date')->index();
+            $table->decimal('total_amount')->default(0);
+            $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending');
+            $table->timestamps();
+        });
+
+        Schema::table('users_draws', function (Blueprint $table) {
+            $table->foreignId('session_id')->constrained('sessions')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->decimal('amount')->default(0);
+            $table->foreignId('draw_id')->constrained('draws')->onDelete('cascade');
+            $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending');
+            $table->timestamps();
         });
     }
 
@@ -43,7 +61,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('draws');
+        Schema::dropIfExists('users_draws');
+
     }
 };
