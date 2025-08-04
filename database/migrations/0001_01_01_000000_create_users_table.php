@@ -37,7 +37,7 @@ return new class extends Migration
         });
 
         // Create sessions table third (depends on users)
-        Schema::create('sessions', function (Blueprint $table) {
+        Schema::create('users_sessions', function (Blueprint $table) {
             $table->id()->primary();
             $table->foreignId('user_id')
                 ->constrained('users')
@@ -49,10 +49,19 @@ return new class extends Migration
             $table->unique(['user_id', 'login_at'], 'user_session_per_day_unique');
         });
 
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->foreignId('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+        });
+
         // Create users_draws table last (depends on sessions, users, and draws)
         Schema::create('users_draws', function (Blueprint $table) {
             $table->id(); // Added primary key
-            $table->foreignId('session_id')->constrained('sessions')->onDelete('cascade');
+            $table->foreignId('session_id')->constrained('users_sessions')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->decimal('amount', 10, 2)->default(0);
             $table->foreignId('draw_id')->constrained('draws')->onDelete('cascade');
@@ -69,6 +78,7 @@ return new class extends Migration
         // Drop tables in reverse order of creation
         Schema::dropIfExists('users_draws');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('users_sessions');
         Schema::dropIfExists('users');
         Schema::dropIfExists('draws');
     }

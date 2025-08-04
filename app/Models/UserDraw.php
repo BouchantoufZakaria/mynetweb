@@ -18,7 +18,7 @@ class UserDraw extends Model
 
     public function session(): BelongsTo
     {
-        return $this->belongsTo(Session::class);
+        return $this->belongsTo(UserSession::class);
     }
 
     public function user(): BelongsTo

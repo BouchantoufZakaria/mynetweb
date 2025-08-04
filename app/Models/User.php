@@ -48,7 +48,7 @@ class User extends Authenticatable
 
     public function sessions(): HasMany
     {
-        return $this->hasMany(Session::class);
+        return $this->hasMany(UserSession::class);
     }
 
 
