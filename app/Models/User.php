@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -21,19 +22,7 @@ class User extends Authenticatable
      */
 
 
-    // Schema::create('users', function (Blueprint $table) {
-    //            $table->id();
-    //            $table->uuid()->unique();
-    //            $table->string('username');
-    //            $table->text('fcm_token')->nullable();
-    //            $table->string('phone_number');
-    //            $table->foreignId('last_win_draw_id')
-    //                ->constrained('draws')
-    //            ->nullOnDelete();
-    //            $table->string('access_token')->unique();
-    //            $table->timestamps();
-    //        });
-
+    use HasApiTokens ;
     protected $fillable = [
         'uuid',
         'username',

@@ -8,6 +8,8 @@ use \Illuminate\Database\Eloquent\Relations\BelongsTo ;
 class UserDraw extends Model
 {
 
+    protected $table = "users_draws";
+
     protected $fillable = [
         'session_id',
         'user_id',

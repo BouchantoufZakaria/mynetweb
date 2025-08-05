@@ -15,14 +15,13 @@ class EnsureTokenIsValid
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $access_token = $request->header('Authorization');
+        $access_token = $request->bearerToken();
         if (!$access_token) {
-            return response()->json(['error' => 'Access token is required'], 401);
+            return response()->json(['message' => 'You are Not Authorized to do that ... xd '], 401);
         }
-        $access_token = str_replace('Bearer ', '', $access_token);
         $user = \App\Models\User::where('access_token', $access_token)->first();
         if (!$user) {
-            return response()->json(['error' => 'Invalid access token'], 401);
+            return response()->json(['message' => 'Invalid access token'], 401);
         }
         // Optionally, you can set the user in the request for further use
         return $next($request);

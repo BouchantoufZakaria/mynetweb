@@ -47,6 +47,7 @@ return new class extends Migration
                 ->index();
 
             $table->unique(['user_id', 'login_at'], 'user_session_per_day_unique');
+            $table->timestamps();
         });
 
         Schema::create('sessions', function (Blueprint $table) {
