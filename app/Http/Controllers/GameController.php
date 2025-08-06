@@ -58,7 +58,7 @@ class GameController extends Controller
                 ]);
             }
         } catch (\Throwable $e) {
-            \Log::error("Error updating user information: " . $e->getMessage());
+            \Log::error("Error login user " . $e->getMessage());
             return response()->json([
                 "message" => "Oops! Something went wrong.",
 //                "error" => $e->getMessage(), enable of debug only
