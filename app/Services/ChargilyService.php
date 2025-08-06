@@ -57,7 +57,27 @@ class ChargilyService
             "country_code" => "DZ"
         ];
 
+        // Log the complete request details
+        \Log::info("Chargily Payment Request Debug", [
+            'url' => $url,
+            'host_header' => $host,
+            'token_prefix' => 'Bearer ' . substr($token, 0, 10) . '...',
+            'payload' => $data,
+            'phone_formatted' => $this->formatNumbersForLocalUses($phoneNumber),
+            'timestamp' => now()->toISOString()
+        ]);
+
         $response = \Illuminate\Support\Facades\Http::withHeader("Host" , $host)->withToken($token)->post($url, $data);
+
+        \Log::info("Chargily Payment Response Debug", [
+            'status_code' => $response->status(),
+            'headers' => $response->headers(),
+            'body' => $response->body(),
+            'successful' => $response->successful(),
+            'failed' => $response->failed()
+        ]);
+
+
         if ($response->successful()) {
             return true ;
         } elseif ($response->failed()) {
