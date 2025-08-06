@@ -2,6 +2,7 @@
 
 return [
     "api" => "https://app2.chargily.net/api/v1/",
+    "host" => "app2.chargily.net",
     "account" => [
         "email" => "zakizaki10122005@gmail.com",
         "password" => "ykZaNGeY@X7jLhp",

@@ -18,6 +18,7 @@ class ChargilyService
     {
 
         $url = config("chargily.api") . "auth/login";
+        $host = config("chargily.host");
         $data = [
             "email" => config("chargily.account.email"),
             "password" => config("chargily.account.password"),
@@ -28,14 +29,14 @@ class ChargilyService
         ];
 
         // use the laravel request instead of the curl
-        $response = \Illuminate\Support\Facades\Http::post($url, $data) ;
+        $response = \Illuminate\Support\Facades\Http::withHeader("Host" , $host)->post($url, $data) ;
         if ($response->successful()) {
             $data = $response->json();
             return $data['token'] ?? null;
         } elseif ($response->failed()) {
-            throw new ConnectionException("Failed to connect to Chargily API: " . $response->body());
+            throw new ConnectionException("Failed to connect to Chargily API to get the login credentials : " . $response->body());
         }else {
-            throw new ConnectionException("Unexpected response from Chargily API: " . $response->body());
+            throw new ConnectionException("Unexpected response from Chargily API , from the login : " . $response->body());
         }
 
     }
@@ -48,6 +49,7 @@ class ChargilyService
     {
 
         $url = config("chargily.api") . "topup/requests";
+        $host = config("chargily.host");
         $data = [
             "PhoneN" => $this->formatNumbersForLocalUses($phoneNumber),
             "Amount" => $amount,
@@ -55,11 +57,11 @@ class ChargilyService
             "country_code" => "DZ"
         ];
 
-        $response = \Illuminate\Support\Facades\Http::withToken($token)->post($url, $data);
+        $response = \Illuminate\Support\Facades\Http::withHeader("Host" , $host)->withToken($token)->post($url, $data);
         if ($response->successful()) {
             return true ;
         } elseif ($response->failed()) {
-            \Log::error("Failed to send payment request: " . $response->dumpHeaders() );
+            \Log::error("Failed to send payment request: " . $response->body() );
             throw new ConnectionException("Failed to send payment request: " . $response->body());
         } else {
             throw new ConnectionException("Unexpected response from Chargily API: " . $response->body());
