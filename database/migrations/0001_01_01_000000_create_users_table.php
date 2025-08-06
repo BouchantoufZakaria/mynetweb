@@ -43,7 +43,6 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete();
             $table->date('login_at')
-                ->default(DB::raw('CURRENT_DATE'))
                 ->index();
 
             $table->unique(['user_id', 'login_at'], 'user_session_per_day_unique');
