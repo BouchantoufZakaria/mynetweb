@@ -29,7 +29,7 @@ class ChargilyService
         ];
 
         // use the laravel request instead of the curl
-        $response = \Illuminate\Support\Facades\Http::withHeader("Host" , $host)->post($url, $data) ;
+        $response = \Illuminate\Support\Facades\Http::withoutVerifying()->withHeader("Host" , $host)->post($url, $data) ;
         if ($response->successful()) {
             $data = $response->json();
             return $data['token'] ?? null;
@@ -67,7 +67,7 @@ class ChargilyService
             'timestamp' => now()->toISOString()
         ]);
 
-        $response = \Illuminate\Support\Facades\Http::withHeader("Host" , $host)->withToken($token)->post($url, $data);
+        $response = \Illuminate\Support\Facades\Http::withoutVerifying()->withHeader("Host" , $host)->withToken($token)->post($url, $data);
 
         \Log::info("Chargily Payment Response Debug", [
             'status_code' => $response->status(),
@@ -79,6 +79,7 @@ class ChargilyService
 
 
         if ($response->successful()) {
+            \Log::info("Payment request sent successfully to Chargily API , info : " . $response->body());
             return true ;
         } elseif ($response->failed()) {
             \Log::error("Failed to send payment request: " . $response->body() );

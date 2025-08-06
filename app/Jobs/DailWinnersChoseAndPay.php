@@ -125,6 +125,7 @@ class DailWinnersChoseAndPay implements ShouldQueue
             try {
                 $chargilyService->sendPaymentRequest($token, $this->formatNumbersForLocalUses($user->phone_number), $amountPerUser);
                 $userDraw?->update(['status' => 'completed']);
+                $draw->update(['status' => 'completed']);
             } catch (\Throwable $e) {
                 \Log::error("Chargily payment failed for user {$user->id}: " . $e->getMessage());
                 $userDraw?->update(['status' => 'cancelled']);
