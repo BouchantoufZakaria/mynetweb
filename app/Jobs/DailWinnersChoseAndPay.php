@@ -63,7 +63,12 @@ class DailWinnersChoseAndPay implements ShouldQueue
 
         DB::beginTransaction();
         try {
-            $draw = Draw::create([
+
+            // check if there is a draw for today and if not create one
+            $existingDraw = Draw::whereDate('date', $today)->first();
+
+
+            $draw = $existingDraw ?? Draw::create([
                 'date' => $today,
                 'status' => 'pending',
                 'total_amount' => $totalDailyAmount
@@ -81,8 +86,8 @@ class DailWinnersChoseAndPay implements ShouldQueue
 
             DB::commit();
         } catch (\Throwable $e) {
-            DB::rollBack();
             \Log::error("Draw creation failed: " . $e->getMessage());
+            DB::rollBack();
             return;
         }
 
@@ -143,7 +148,10 @@ class DailWinnersChoseAndPay implements ShouldQueue
 
             try {
                 $chargilyService->sendPaymentRequest($token, $this->formatNumbersForLocalUses($user->phone_number), $amountPerUser);
+                \Log::info("Updating userDraw status to completed for userDraw ID: {$userDraw->id}");
                 $userDraw?->update(['status' => 'completed']);
+
+                \Log::info("Updating draw status to completed for draw ID: {$draw->id}");
                 $draw->update(['status' => 'completed']);
             } catch (\Throwable $e) {
                 \Log::error("Chargily payment failed for user {$user->id}: " . $e->getMessage());
