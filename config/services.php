@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'telegram' => [
+        'bot_token' => '7716385245:AAH7_WFhvNufTgZ8FF-LpCjgDPpqF6fr7rY',
+        'chat_id'   => '@mynetdz',
+    ],
+
 ];

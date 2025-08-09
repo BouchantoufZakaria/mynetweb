@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\UserDraw;
 use App\Models\UserSession;
 use App\Services\ChargilyService;
+use App\Services\TelegramService;
 use App\Utils\NumbersUtils;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -86,6 +87,24 @@ class DailWinnersChoseAndPay implements ShouldQueue
         }
 
         $this->payWinners($selectedUsers, $draw, $amountPerUser);
+
+
+        $telegramService = new TelegramService();
+        $message = "🎉 إعلان الفائزين بسحب اليوم 🎉" . "\n\n";
+        $message .= "📅 تاريخ السحب: " . $draw->date->toDateString() . "\n";
+        $message .= "💰 إجمالي الجوائز: " . number_format($draw->total_amount, 2) . "\n\n";
+        $message .= "🏆 الفائزون:\n";
+        foreach ($selectedUsers as $index => $user) {
+            $userDraw = UserDraw::where('user_id', $user->id)
+                ->where('draw_id', $draw->id)
+                ->first();
+            $message .= ($index + 1) . "️⃣ " . $user->username . " – 📱 " . $this->hidePhoneNumber($this->formatNumbersForLocalUses($user->phone_number)) . " – 💵 " . number_format($userDraw->amount, 2) . "\n";
+        }
+        $message .= "\n✨ ألف مبروك للفائزين 🎊 وموعدنا مع السحب القادم غداً إن شاء الله!";
+
+        $telegramService->sendMessage($message);
+
+
     }
 
     private function getEligibleUsers(Carbon $today): Collection
