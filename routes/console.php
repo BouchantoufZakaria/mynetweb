@@ -12,4 +12,4 @@ Artisan::command('inspire', function () {
 Schedule::job(new DailWinnersChoseAndPay)->dailyAt('00:00');
 Schedule::call(function () {
     \Log::info('Scheduler is working at ' . now());
-})->everyMinute();
+})->everyMinute() ;

@@ -10,14 +10,16 @@ use App\Services\ChargilyService;
 use App\Services\TelegramService;
 use App\Utils\NumbersUtils;
 use Carbon\Carbon;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class DailWinnersChoseAndPay implements ShouldQueue
+class DailWinnersChoseAndPay implements ShouldQueue , ShouldBeUnique
 {
     use Queueable;
     use NumbersUtils;
@@ -64,7 +66,7 @@ class DailWinnersChoseAndPay implements ShouldQueue
         DB::beginTransaction();
         try {
 
-            // check if there is a draw for today and if not create one
+
             $existingDraw = Draw::whereDate('date', $today)->first();
 
 
@@ -110,6 +112,16 @@ class DailWinnersChoseAndPay implements ShouldQueue
         $telegramService->sendMessage($message);
 
 
+    }
+
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array<int, object>
+     */
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping()];
     }
 
     private function getEligibleUsers(Carbon $today): Collection
